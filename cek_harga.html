@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CEK DATA PLU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #ecfdf5;
+            --secondary: #475569;
+            --danger: #be123c;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 0;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .main-wrapper {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #initial-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .spinner {
+            width: 48px; height: 48px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .search-container {
+            width: 100%;
+            max-width: 550px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+
+        .title-app {
+            text-align: center;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        textarea {
+            width: 100%; height: 90px; padding: 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            resize: none;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+
+        .scan-wrapper {
+            width: 100%;
+            margin-bottom: 24px;
+            box-sizing: border-box;
+        }
+
+        .btn-scan-trigger {
+            width: 100%;
+            padding: 14px;
+            background: #fff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            color: var(--secondary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+
+        .btn-scan-trigger:active {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .scan-note {
+            display: block;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-top: 8px;
+        }
+
+        #reader {
+            width: 100% !important;
+            border-radius: 14px;
+            overflow: hidden;
+            display: none;
+            margin-top: 12px;
+            border: 1px solid #e2e8f0;
+            background: #000;
+        }
+        
+        #reader video {
+            width: 100% !important;
+            height: auto !important;
+            border-radius: 14px;
+            object-fit: cover;
+        }
+
+        #reader__dashboard { display: none !important; }
+        #reader__status_span { display: none !important; }
+
+        .button-group { display: flex; gap: 10px; }
+        button { padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 700; font-family: inherit; transition: all 0.2s; }
+
+        .search-btn { flex: 2; background-color: var(--primary); color: white; }
+        .reset-btn { flex: 1; background-color: #f1f5f9; color: var(--secondary); }
+
+        .modal-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 1000; backdrop-filter: blur(10px);
+            justify-content: center; align-items: center;
+            padding: 16px; box-sizing: border-box;
+        }
+
+        .modal-content {
+            background: white; width: 100%; max-width: 420px;
+            max-height: 90vh; border-radius: 30px;
+            position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        #modal-card-container { overflow-y: auto; padding: 24px; flex: 1; }
+
+        .card-animate { animation: cardSlideIn 0.4s ease-out forwards; }
+        @keyframes cardSlideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .close-modal {
+            position: absolute; top: 16px; right: 16px;
+            width: 32px; height: 32px; background: #f1f5f9;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10; font-weight: bold; color: var(--secondary);
+        }
+
+        .card-header { text-align: center; margin-bottom: 20px; }
+        
+        .product-img-container { 
+            width: 100%; 
+            height: 220px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            margin-bottom: 15px; 
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .img-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        
+        .img-placeholder svg { width: 40px; height: 40px; margin-bottom: 8px; opacity: 0.5; }
+
+        .plu-badge { font-size: 11px; color: var(--primary); font-weight: 800; background: var(--primary-light); padding: 4px 14px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+        .desc-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); line-height: 1.3; margin: 0; }
+
+        .price-section { 
+            background: #f8fafc; border: 1.5px solid #f1f5f9;
+            padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;
+        }
+
+        .label-sm { font-size: 10px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.8px; }
+        .val-normal { font-size: 18px; color: #94a3b8; text-decoration: line-through; font-weight: 600; }
+        .val-promo { font-size: 36px; color: var(--danger); font-weight: 900; }
+        .val-only { font-size: 32px; color: var(--text-main); font-weight: 800; }
+
+        .promo-banner {
+            background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+            border-left: 5px solid var(--danger); padding: 18px; border-radius: 14px;
+            margin-bottom: 12px;
+        }
+        .promo-title { color: var(--danger); font-size: 11px; font-weight: 900; margin-bottom: 6px; }
+        .promo-text { font-size: 14px; font-weight: 700; color: #881337; line-height: 1.5; }
+        .promo-date { font-size: 11px; font-weight: 700; color: #be123c; margin-top: 8px; opacity: 0.8; display: flex; align-items: center; gap: 5px; }
+
+        .modal-footer {
+            padding: 16px 24px; background: #f8fafc;
+            display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9;
+        }
+
+        .nav-btn { background: white; border: 1.5px solid #e2e8f0; padding: 10px 22px; border-radius: 12px; font-size: 12px; font-weight: 700; color: var(--secondary); }
+
+        footer { margin-top: 20px; text-align: center; padding-bottom: 20px; }
+
+        .warning-text {
+            max-width: 550px;
+            width: 100%;
+            margin-top: 24px;
+            padding: 12px;
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 12px;
+            color: #92400e;
+            font-size: 12px;
+            font-weight: 700;
+            box-sizing: border-box;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .warning-text span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        .home-float-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background-color: var(--card-bg);
+            padding: 8px 16px 8px 12px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 900;
+        }
+
+        .home-float-btn svg { width: 24px; height: 24px; stroke: currentColor; }
+        .home-float-btn span { font-size: 13px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <div id="initial-loader">
+        <div class="spinner"></div>
+        <div style="font-weight: 700; color: var(--secondary); font-size: 12px; letter-spacing: 1px;">MEMUAT DATA ...</div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="search-container" id="main-content">
+            <div class="title-app">CEK HARGA - PROMO</div>
+            <textarea id="search-input" placeholder="Ketik PLU / Barcode disini ... &#10;Gunakan spasi atau enter untuk cari banyak produk ..."></textarea>
+            
+            <div class="scan-wrapper">
+                <div class="btn-scan-trigger" id="btn-scan-start">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="8" y1="12" x2="16" y2="12"></line><line x1="12" y1="8" x2="12" y2="16"></line></svg>
+                    <span>SCAN BARCODE</span>
+                </div>
+                <div id="reader"></div>
+                <span class="scan-note">" Kalau barcode tidak terdeteksi dikamera silahkan ketik manual dikolom pencarian "</span>
+            </div>
+
+            <div class="button-group">
+                <button id="search-button" class="search-btn">Tampilkan Data</button>
+                <button id="reset-button" class="reset-btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="warning-text">
+            <span>‼️ Untuk harga minyak mungkin agak sedikit error di harga promosi nya jadi silahkan cek di aplikasi klik indomaret .. ‼️</span>
+        </div>
+
+        <footer>
+            <div style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">&copy; M.H.R | Last Update 19-01-2026</div>
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="close-modal" id="close-modal">✕</div>
+            <div id="modal-card-container"></div>
+            <div class="modal-footer">
+                <button class="nav-btn" id="prev-btn">Prev</button>
+                <span id="page-info" style="font-size: 14px; font-weight: 800; color: var(--secondary);">0 / 0</span>
+                <button class="nav-btn" id="next-btn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <a href="https://indomarc.github.io/index/" class="home-float-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Menu Utama</span>
+    </a>
+
+    <script>
+        const url = 'https://raw.githubusercontent.com/IndoMarc/DATA/refs/heads/main/19-01-2026.json';
+        const urlPromo = 'https://raw.githubusercontent.com/IndoMarc/DATA/refs/heads/main/Promo-19-01-2026.CSV';
+        
+        let rawData = [], allPromoList = [], filteredData = [], currentIndex = 0;
+        let html5QrCode = null;
+        const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+
+        function parsePromoCSV(text) {
+            const rows = text.split(/\r?\n/);
+            if (rows.length < 2) return;
+            const header = rows[0].split('|').map(h => h.trim().toUpperCase());
+            
+            const idx = {
+                items: header.indexOf('ITEMSYARATORI'),
+                mekanisme: header.indexOf('MEKANISME'),
+                potongan: header.indexOf('POTONGANRPTARGET'),
+                qtyMin: header.indexOf('QTYSYARATMIN'),
+                tglAwal: header.indexOf('TANGGALAWAL'),
+                tglAkhir: header.indexOf('TANGGALAKHIR')
+            };
+
+            for (let i = 1; i < rows.length; i++) {
+                if (!rows[i].trim()) continue;
+                const cols = rows[i].split('|');
+                
+                allPromoList.push({
+                    itemSyaratRaw: cols[idx.items] || "",
+                    mekanisme: cols[idx.mekanisme]?.trim() || '-',
+                    nilaiPotongan: parseInt(cols[idx.potongan]?.replace(/[!Rp,.\s]/g, '') || "0"),
+                    qtyMin: parseInt(cols[idx.qtyMin]?.replace(/[!\s]/g, '') || "1"),
+                    tglAwal: cols[idx.tglAwal]?.split(' ')[0].trim() || '-',
+                    tglAkhir: cols[idx.tglAkhir]?.split(' ')[0].trim() || '-'
+                });
+            }
+        }
+
+        function parseDate(dateStr) {
+            if (!dateStr || dateStr === '-') return null;
+            let parts = dateStr.includes('-') ? dateStr.split('-') : dateStr.split('/');
+            if (parts.length === 3) {
+                let d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+                if (y < 100) y += 2000;
+                let dt = new Date(y, m, d);
+                dt.setHours(0, 0, 0, 0);
+                return dt.getTime();
+            }
+            return null;
+        }
+
+        Promise.all([
+            fetch(url).then(r => r.json()),
+            fetch(urlPromo).then(r => r.text())
+        ]).then(([json, csv]) => {
+            rawData = Array.isArray(json) ? json : [json];
+            parsePromoCSV(csv);
+            document.getElementById('initial-loader').style.display = 'none';
+            document.getElementById('main-content').style.opacity = '1';
+        }).catch(err => console.error(err));
+
+        const scanBtn = document.getElementById('btn-scan-start');
+        const readerEl = document.getElementById('reader');
+
+        scanBtn.addEventListener('click', async () => {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+
+            if (readerEl.style.display === 'block') {
+                stopScanner();
+            } else {
+                readerEl.style.display = 'block';
+                scanBtn.querySelector('span').textContent = "STOP SCANNER";
+                scanBtn.style.borderColor = "var(--danger)";
+                scanBtn.style.color = "var(--danger)";
+
+                const config = { 
+                    fps: 20, 
+                    rememberLastUsedCamera: true,
+                    aspectRatio: 1.777778
+                };
+                
+                try {
+                    await html5QrCode.start(
+                        { facingMode: "environment" }, 
+                        config, 
+                        (decodedText) => {
+                            document.getElementById('search-input').value = decodedText;
+                            stopScanner();
+                            document.getElementById('search-button').click();
+                        }
+                    );
+                } catch (err) {
+                    alert("Gagal akses kamera. Pastikan izin kamera aktif.");
+                    stopScanner();
+                }
+            }
+        });
+
+        function stopScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    readerEl.style.display = 'none';
+                    scanBtn.querySelector('span').textContent = "SCAN BARCODE";
+                    scanBtn.style.borderColor = "#cbd5e1";
+                    scanBtn.style.color = "var(--secondary)";
+                });
+            } else {
+                readerEl.style.display = 'none';
+                scanBtn.querySelector('span').textContent = "SCAN BARCODE";
+            }
+        }
+
+        function renderModalCard() {
+            const container = document.getElementById('modal-card-container');
+            container.innerHTML = '';
+            
+            const item = filteredData[currentIndex];
+            const itemPLU = String(item.PLU).trim();
+            const priceNormal = parseInt(item.PRICE || 0);
+            
+            const itemPromos = allPromoList.filter(p => p.itemSyaratRaw.includes(itemPLU));
+            
+            let isSinglePromo = false;
+            let pricePromo = priceNormal;
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+            itemPromos.forEach(p => {
+                if (p.nilaiPotongan > 0 && p.qtyMin === 1) {
+                    const start = parseDate(p.tglAwal), end = parseDate(p.tglAkhir);
+                    if (start !== null && end !== null && today >= start && today <= end) {
+                        isSinglePromo = true;
+                        pricePromo = priceNormal - p.nilaiPotongan;
+                    }
+                }
+            });
+
+            const cardWrapper = document.createElement('div');
+            cardWrapper.className = 'card-animate';
+            cardWrapper.innerHTML = `
+                <div class="card-header">
+                    <div class="product-img-container">
+                        <img class="product-img" 
+                             src="https://cdn-klik.klikindomaret.com/klik-catalog/product/${itemPLU}_1.jpg" 
+                             alt="Produk ${itemPLU}" 
+                             referrerpolicy="no-referrer"
+                             onerror="handleImageError(this)">
+                    </div>
+                    <span class="plu-badge">${item.PLU}</span>
+                    <h2 class="desc-title">${item.DESC2}</h2>
+                </div>
+                <div class="price-section">
+                    ${isSinglePromo ? `
+                        <span class="label-sm">Harga Normal</span>
+                        <div class="val-normal">${formatter.format(priceNormal)}</div>
+                        <span class="label-sm" style="color:var(--danger);margin-top:10px">Harga Promo</span>
+                        <div class="val-promo">${formatter.format(pricePromo)}</div>
+                    ` : `
+                        <span class="label-sm">Harga Normal</span>
+                        <div class="val-only">${formatter.format(priceNormal)}</div>
+                    `}
+                </div>
+                <div id="promo-list-wrapper">
+                    ${itemPromos.map(p => `
+                        <div class="promo-banner">
+                            <div class="promo-title">MEKANISME PROMOSI</div>
+                            <div class="promo-text">${p.mekanisme}</div>
+                            <div class="promo-date">PERIODE PROMOSI : ${p.tglAwal} s/d ${p.tglAkhir}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(cardWrapper);
+
+            document.getElementById('page-info').textContent = `${currentIndex + 1} / ${filteredData.length}`;
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            document.getElementById('next-btn').disabled = currentIndex === filteredData.length - 1;
+        }
+
+        window.handleImageError = function(img) {
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="img-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                        <path d="m3.3 7 8.7 5 8.7-5"></path>
+                        <path d="M12 22V12"></path>
+                    </svg>
+                    GAMBAR TIDAK TERSEDIA
+                </div>
+            `;
+        };
+
+        document.getElementById('search-button').addEventListener('click', () => {
+            const inputVal = document.getElementById('search-input').value.trim();
+            const keywords = inputVal ? inputVal.split(/[\s\n]+/).map(k => k.toLowerCase()) : [];
+            
+            filteredData = rawData.filter(d => {
+                if (keywords.length === 0) return true;
+                return keywords.some(key => {
+                    return Object.values(d).some(v => String(v).toLowerCase().includes(key));
+                });
+            });
+
+            if(filteredData.length > 0) {
+                currentIndex = 0;
+                document.getElementById('modal-overlay').style.display = 'flex';
+                renderModalCard();
+            } else { alert("Data tidak ditemukan!"); }
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => document.getElementById('modal-overlay').style.display = 'none');
+        document.getElementById('prev-btn').addEventListener('click', () => { if(currentIndex > 0) { currentIndex--; renderModalCard(); } });
+        document.getElementById('next-btn').addEventListener('click', () => { if(currentIndex < filteredData.length - 1) { currentIndex++; renderModalCard(); } });
+        document.getElementById('reset-button').addEventListener('click', () => {
+            document.getElementById('search-input').value = '';
+            stopScanner();
+        });
+    </script>
+</body>
+</html>

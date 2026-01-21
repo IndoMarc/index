@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PLU TO QRCODE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #ecfdf5;
+            --secondary: #475569;
+            --danger: #be123c;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 0;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .main-wrapper {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: flex-start;
+            padding-top: 2vh;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 550px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .title-app {
+            text-align: center;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px; padding: 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            resize: none;
+            box-sizing: border-box;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        textarea:focus { border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--primary-light); }
+
+        .button-group { display: flex; gap: 10px; }
+        button { padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px;
+        font-weight: 700; font-family: inherit; transition: all 0.2s; }
+
+        .generate-btn { flex: 2;
+        background-color: var(--primary); color: white; }
+        .reset-btn { flex: 1; background-color: #f1f5f9; color: var(--secondary); }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 1000; backdrop-filter: blur(10px);
+            justify-content: center; align-items: center;
+            padding: 16px; box-sizing: border-box;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%; max-width: 400px;
+            border-radius: 30px;
+            position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalPop { from { transform: scale(0.9);
+        opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .close-modal {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 32px; height: 32px; background: #f1f5f9;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            z-index: 10; font-weight: bold; color: var(--secondary);
+        }
+
+        .qr-section { 
+            padding: 40px 24px 24px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        #qrcode {
+            background: #fff;
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .data-label {
+            margin-top: 20px;
+            font-size: 11px; color: var(--primary); font-weight: 800; 
+            background: var(--primary-light); padding: 6px 16px; 
+            border-radius: 20px; text-transform: uppercase;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            background: #f8fafc;
+            display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9;
+        }
+
+        .nav-btn { background: white; border: 1.5px solid #e2e8f0; padding: 10px 22px;
+        border-radius: 12px; font-size: 12px; font-weight: 700; color: var(--secondary); }
+        .nav-btn:disabled { opacity: 0.5;
+        cursor: not-allowed; }
+
+        footer { margin-top: 24px; text-align: center; }
+
+        .home-float-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background-color: var(--card-bg);
+            padding: 8px 16px 8px 12px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 900;
+        }
+
+        .home-float-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background-color: var(--primary-light);
+        }
+
+        .home-float-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+        }
+
+        .home-float-btn span {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="search-container">
+            <div class="title-app">PLU TO QRCODE</div>
+            <textarea id="inputData" placeholder="Ketik PLU disini ... &#10;Pisah kan dengan spasi atau enter untuk buat banyak QRCode ... &#10;Contoh : &#10;10036631:10 ( jadi PLU 10036631 qty 10pcs ) &#10;kalau hanya 1 pcs ketik PLU saja ... "></textarea>
+            
+            <div class="button-group">
+                <button class="generate-btn" onclick="startGenerate()">Buat QRCode</button>
+                <button class="reset-btn" onclick="resetApp()">Reset</button>
+            </div>
+        </div>
+
+        <footer>
+            <div style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">&copy; M.H.R</div>
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="overlay">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closePopup()">✕</div>
+            
+            <div class="qr-section">
+                <div id="qrcode"></div>
+                <div id="dataLabel" class="data-label"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">Prev</button>
+                <span id="pageInfo" style="font-size: 14px; font-weight: 800; color: var(--secondary);">0 / 0</span>
+                <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <a href="https://indomarc.github.io/index/" class="home-float-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Menu Utama</span>
+    </a>
+
+    <script>
+        let items = [];
+        let currentIdx = 0;
+
+        function startGenerate() {
+            const val = document.getElementById('inputData').value.trim();
+            if (!val) {
+                alert("Masukkan data PLU terlebih dahulu!");
+                return;
+            }
+
+            const rawItems = val.split(/[\s,\n]+/).filter(i => i.trim().length > 0);
+            
+            items = rawItems.map(item => {
+                const cleanItem = item.trim();
+                
+                if (cleanItem.includes(':')) {
+                    const parts = cleanItem.split(':');
+                    const plu = parts[0].trim();
+                    const qty = parts[1] ? parts[1].trim() : "1";
+                    const paddedQty = qty.padStart(4, '0');
+                    return `B${plu}${paddedQty}`;
+                } else {
+                    return cleanItem;
+                }
+            });
+
+            currentIdx = 0;
+            
+            if (items.length > 0) {
+                document.getElementById('overlay').style.display = 'flex';
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            const container = document.getElementById("qrcode");
+            container.innerHTML = "";
+            
+            new QRCode(container, {
+                text: items[currentIdx],
+                width: 200,
+                height: 200,
+                colorDark : "#1e293b",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            document.getElementById('dataLabel').innerText = items[currentIdx];
+            document.getElementById('pageInfo').innerText = `${currentIdx + 1} / ${items.length}`;
+            
+            document.getElementById('prevBtn').disabled = (currentIdx === 0);
+            document.getElementById('nextBtn').disabled = (currentIdx === items.length - 1);
+        }
+
+        function navigate(step) {
+            currentIdx += step;
+            updateDisplay();
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function resetApp() {
+            document.getElementById('inputData').value = "";
+            items = [];
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('overlay');
+            if (event.target == modal) {
+                closePopup();
+            }
+        }
+    </script>
+</body>
+</html>
