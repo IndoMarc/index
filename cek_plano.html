@@ -416,7 +416,7 @@
 
         function showImageModal(src) {
             const body = document.getElementById('modal-body');
-            body.innerHTML = `<img src="${src}" class="img-expanded" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTBweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2NjYyI+Tk88L3RleHQ+PC9zdmc+'">`;
+            body.innerHTML = `<img src="${src}" class="img-expanded" referrerpolicy="no-referrer" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTBweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2NjYyI+Tk88L3RleHQ+PC9zdmc+'">`;
             document.getElementById('global-modal').style.display = 'flex';
         }
 
@@ -481,15 +481,12 @@
                     const shelf = item.NOSHELF || '-';
                     const baris = item.KIRIKANAN || '-';
                     const fullLokasi = `${shortRak}-${shelf}-${baris}`;
-                    
-                    // PERBAIKAN DISINI: Menghapus spasi pada PLU agar URL gambar valid
-                    const cleanPLU = String(item.PLU).trim().replace(/\s/g, '');
-                    const imgSrc = `https://cdn-klik.klikindomaret.com/klik-catalog/product/${cleanPLU}_1.jpg`;
+                    const imgSrc = `https://cdn-klik.klikindomaret.com/klik-catalog/product/${String(item.PLU).trim()}_1.jpg`;
 
                     tr.innerHTML = `
                         <td style="text-align:center; padding-left: 4px; padding-right: 4px;"><span class="badge-rak">${fullLokasi}</span></td>
                         <td style="text-align:center">
-                            <img class="img-col" src="${imgSrc}" onclick="showImageModal('${imgSrc}')" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTBweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2NjYyI+Tk88L3RleHQ+PC9zdmc+'">
+                            <img class="img-col" src="${imgSrc}" referrerpolicy="no-referrer" onclick="showImageModal('${imgSrc}')" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTBweCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2NjYyI+Tk88L3RleHQ+PC9zdmc+'">
                         </td>
                         <td>
                             <div class="plu-text">${item.PLU}</div>
