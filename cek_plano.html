@@ -378,7 +378,7 @@
         </footer>
     </div>
 
-    <a href="https://indomarc.github.io/index/" class="home-float-btn">
+    <a href="index.html" class="home-float-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -481,7 +481,10 @@
                     const shelf = item.NOSHELF || '-';
                     const baris = item.KIRIKANAN || '-';
                     const fullLokasi = `${shortRak}-${shelf}-${baris}`;
-                    const imgSrc = `https://cdn-klik.klikindomaret.com/klik-catalog/product/${String(item.PLU).trim()}_1.jpg`;
+                    
+                    // PERBAIKAN DISINI: Menghapus spasi pada PLU agar URL gambar valid
+                    const cleanPLU = String(item.PLU).trim().replace(/\s/g, '');
+                    const imgSrc = `https://cdn-klik.klikindomaret.com/klik-catalog/product/${cleanPLU}_1.jpg`;
 
                     tr.innerHTML = `
                         <td style="text-align:center; padding-left: 4px; padding-right: 4px;"><span class="badge-rak">${fullLokasi}</span></td>
