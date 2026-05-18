@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCAN ITT</title>
+    <style>
+        body {
+            font-family: Cambria, Georgia, serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .search-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .search-group textarea {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: Cambria, Georgia, serif;
+            resize: vertical;
+            min-height: 60px;
+        }
+        .search-group textarea:focus {
+            border-color: #0d47a1;
+        }
+        .dropdown-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .filter-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .filter-group select {
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            outline: none;
+            font-family: Cambria, Georgia, serif;
+            width: 100%;
+            box-sizing: border-box;
+            height: 42px;
+        }
+        .filter-group select:focus {
+            border-color: #0d47a1;
+        }
+        .shelf-range-group {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+        .shelf-sub-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .shelf-sub-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .shelf-sub-group select {
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            outline: none;
+            font-family: Cambria, Georgia, serif;
+            width: 100%;
+            box-sizing: border-box;
+            height: 42px;
+        }
+        .shelf-sub-group select:focus {
+            border-color: #0d47a1;
+        }
+        .button-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: Cambria, Georgia, serif;
+            text-align: center;
+        }
+        .btn-submit {
+            background-color: #0d47a1;
+            color: white;
+            min-width: 160px;
+        }
+        .btn-submit:hover {
+            background-color: #0a3981;
+        }
+        .btn-reset {
+            background-color: #e0e0e0;
+            color: #333;
+            min-width: 90px;
+        }
+        .btn-reset:hover {
+            background-color: #d5d5d5;
+        }
+        .error {
+            text-align: center;
+            font-size: 1.2rem;
+            color: red;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #666;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        .modal-overlay.show-modal .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .close-modal:hover {
+            color: #333;
+        }
+        .card-view {
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .card-animate {
+            animation: fadeInSlide 0.35s ease forwards;
+        }
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .product-image-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .product-image {
+            max-width: 150px;
+            height: auto;
+            max-height: 150px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        .product-details {
+            flex-shrink: 0;
+        }
+        .plu {
+            font-size: 0.95rem;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        .title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #222;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
+        .location-info {
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            font-size: 1rem;
+            color: #555;
+        }
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #fff;
+            margin-top: 15px;
+        }
+        .grid-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .grid-item-full {
+            grid-column: span 2;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ccc;
+        }
+        .grid-item:nth-child(2), .grid-item:nth-child(3) {
+            border-bottom: none;
+        }
+        .grid-item:nth-child(2) {
+            border-right: 1px solid #eee;
+        }
+        .label {
+            font-weight: 600;
+            color: #444;
+            font-size: 0.9rem;
+        }
+        .grid-value {
+            color: #222;
+            font-size: 1.05rem;
+        }
+        .barcode-area {
+            margin-top: 5px;
+            text-align: center;
+            background: #fff;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        .barcode-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .barcode-text {
+            font-family: monospace;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 4px;
+            color: #333;
+        }
+        .btn-all-barcodes-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-all-barcodes {
+            background: none;
+            color: #0d47a1;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: Cambria, Georgia, serif;
+            transition: color 0.2s;
+            text-align: center;
+        }
+        .btn-all-barcodes:hover {
+            color: #f57c00;
+        }
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 5px;
+        }
+        .nav-btn {
+            background-color: #0d47a1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Cambria, Georgia, serif;
+            transition: background-color 0.2s;
+        }
+        .nav-btn:hover:not(:disabled) {
+            background-color: #0a3981;
+        }
+        .nav-btn:disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+        }
+        .page-indicator {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #555;
+        }
+        .all-barcodes-list {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+
+    <h1>SCAN ITT PJR</h1>
+
+    <div class="filter-container">
+        <div class="search-group">
+            <label for="search-input">Cari Produk</label>
+            <textarea id="search-input" placeholder="Ketik PLU atau Barcode disini ..."></textarea>
+        </div>
+        
+        <div class="dropdown-row">
+            <div class="filter-group">
+                <label for="filter-rak">Pilih Modis</label>
+                <select id="filter-rak">
+                    <option value="Semua">Semua Modis</option>
+                </select>
+            </div>
+            
+            <div class="shelf-range-group">
+                <div class="shelf-sub-group">
+                    <label for="filter-shelf-dari">Dari Shelfing</label>
+                    <select id="filter-shelf-dari">
+                        <option value="Semua">Semua</option>
+                    </select>
+                </div>
+                <div class="shelf-sub-group">
+                    <label for="filter-shelf-sampai">Sampai Shelfing</label>
+                    <select id="filter-shelf-sampai">
+                        <option value="Semua">Semua</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button id="btn-reset" class="btn btn-reset">Reset</button>
+            <button id="btn-submit" class="btn btn-submit">Tampilkan Data</button>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">Memuat data produk ...</div>
+    <div id="error-message" class="error"></div>
+
+    <div id="result-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-modal" class="close-modal">&times;</button>
+            
+            <div id="card-container" class="card-view"></div>
+            
+            <div class="nav-row">
+                <button id="btn-prev" class="nav-btn">Prev</button>
+                <span id="page-indicator" class="page-indicator">0 / 0</span>
+                <button id="btn-next" class="nav-btn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const url = 'https://raw.githubusercontent.com/IndoMarc/data/refs/heads/main/18_Mei_2026.json';
+        let rawData = [];
+        let filteredData = [];
+        let currentIndex = 0;
+
+        const searchInput = document.getElementById('search-input');
+        const selectRak = document.getElementById('filter-rak');
+        const selectShelfDari = document.getElementById('filter-shelf-dari');
+        const selectShelfSampai = document.getElementById('filter-shelf-sampai');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnReset = document.getElementById('btn-reset');
+        const errorMessage = document.getElementById('error-message');
+        
+        const resultModal = document.getElementById('result-modal');
+        const closeModal = document.getElementById('close-modal');
+        const cardContainer = document.getElementById('card-container');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        function populateDropdowns(data) {
+            const raks = new Set();
+            const shelfs = new Set();
+
+            data.forEach(item => {
+                if (item.NAMA_RAK) raks.add(item.NAMA_RAK);
+                if (item.NOSHELF) {
+                    const shelfNum = parseInt(item.NOSHELF);
+                    if (!isNaN(shelfNum)) {
+                        shelfs.add(shelfNum);
+                    }
+                }
+            });
+
+            const sortedRaks = Array.from(raks).sort();
+            sortedRaks.forEach(rak => {
+                const option = document.createElement('option');
+                option.value = rak;
+                option.textContent = rak;
+                selectRak.appendChild(option);
+            });
+
+            const sortedShelfs = Array.from(shelfs).sort((a, b) => a - b);
+            sortedShelfs.forEach(shelf => {
+                const optionDari = document.createElement('option');
+                optionDari.value = shelf;
+                optionDari.textContent = shelf;
+                selectShelfDari.appendChild(optionDari);
+
+                const optionSampai = document.createElement('option');
+                optionSampai.value = shelf;
+                optionSampai.textContent = shelf;
+                selectShelfSampai.appendChild(optionSampai);
+            });
+        }
+
+        function generateBarcodeElement(containerId, value) {
+            const barcodeArea = document.createElement('div');
+            barcodeArea.className = 'barcode-area';
+            
+            const img = document.createElement('img');
+            img.className = 'barcode-image';
+            
+            barcodeArea.appendChild(img);
+            document.getElementById(containerId).appendChild(barcodeArea);
+            
+            try {
+                JsBarcode(img, value, {
+                    format: "CODE128",
+                    lineColor: "#000",
+                    width: 2,
+                    height: 50,
+                    displayValue: true,
+                    fontSize: 13,
+                    font: "monospace"
+                });
+            } catch (e) {
+                barcodeArea.innerHTML = `<span class="barcode-text">${value} (Gagal membuat barcode)</span>`;
+            }
+        }
+
+        function showAllBarcodes(barcodes) {
+            const allBarcodesBtnContainer = document.getElementById('btn-show-all-barcodes-container');
+            if (allBarcodesBtnContainer) allBarcodesBtnContainer.style.display = 'none';
+
+            const listContainer = document.createElement('div');
+            listContainer.className = 'all-barcodes-list';
+            listContainer.id = 'all-barcodes-list-container';
+            
+            document.getElementById('barcode-section').appendChild(listContainer);
+
+            barcodes.forEach((barcode, index) => {
+                const itemWrapper = document.createElement('div');
+                itemWrapper.id = `extra-barcode-${index}`;
+                listContainer.appendChild(itemWrapper);
+                generateBarcodeElement(itemWrapper.id, barcode);
+            });
+        }
+
+        function renderCurrentCard() {
+            if (filteredData.length === 0) return;
+
+            const item = filteredData[currentIndex];
+            const rak = item.NAMA_RAK ? item.NAMA_RAK : '-';
+            const shelf = item.NOSHELF ? item.NOSHELF : '-';
+            const posisi = item.KIRIKANAN ? item.KIRIKANAN : '-';
+
+            const hasBarcodes = item.BARCD && Array.isArray(item.BARCD) && item.BARCD.length > 0;
+            const primaryBarcode = hasBarcodes ? item.BARCD[0] : null;
+            const hasMultipleBarcodes = hasBarcodes && item.BARCD.length > 1;
+
+            const imageUrl = `https://cdn-klik.klikindomaret.com/klik-catalog/product/${item.PLU}_1.jpg`;
+
+            cardContainer.classList.remove('card-animate');
+            void cardContainer.offsetWidth; 
+            cardContainer.classList.add('card-animate');
+
+            cardContainer.innerHTML = `
+                <div class="product-image-container">
+                    <img class="product-image" src="${imageUrl}" alt="Foto Produk" onerror="this.style.display='none';">
+                </div>
+                <div class="product-details">
+                    <div class="plu">PLU : ${item.PLU}</div>
+                    <h2 class="title">${item.DESC2}</h2>
+                </div>
+                <div>
+                    <div class="location-info">
+                        <div id="barcode-section">
+                            <span class="label">Barcode :</span>
+                            ${primaryBarcode ? `<div id="primary-barcode-container"></div>` : '<span>-</span>'}
+                            ${hasMultipleBarcodes ? `
+                                <div id="btn-show-all-barcodes-container" class="btn-all-barcodes-container">
+                                    <button id="btn-show-all-barcodes" class="btn-all-barcodes">↓↓ Tampilkan Semua Barcode ↓↓</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="location-grid">
+                            <div class="grid-item grid-item-full">
+                                <span class="label">Modis</span>
+                                <span class="grid-value">${rak}</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="label">Shelfing</span>
+                                <span class="grid-value">${shelf}</span>
+                            </div>
+                            <div class="grid-item">
+                                <span class="label">Baris</span>
+                                <span class="grid-value">${posisi}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (primaryBarcode) {
+                generateBarcodeElement('primary-barcode-container', primaryBarcode);
+            }
+
+            if (hasMultipleBarcodes) {
+                document.getElementById('btn-show-all-barcodes').addEventListener('click', () => {
+                    showAllBarcodes(item.BARCD);
+                });
+            }
+
+            pageIndicator.textContent = `${currentIndex + 1} / ${filteredData.length}`;
+            btnPrev.disabled = currentIndex === 0;
+            btnNext.disabled = currentIndex === filteredData.length - 1;
+            
+            cardContainer.scrollTop = 0;
+        }
+
+        function filterAndDisplayData() {
+            errorMessage.innerHTML = '';
+            const rawSearchValue = searchInput.value;
+            const searchTokens = rawSearchValue
+                .replace(/\n/g, ' ')
+                .split(' ')
+                .map(token => token.toLowerCase().trim())
+                .filter(token => token !== '');
+
+            const selectedRak = selectRak.value;
+            const selectedDari = selectShelfDari.value;
+            const selectedSampai = selectShelfSampai.value;
+
+            filteredData = rawData.filter(item => {
+                if (searchTokens.length > 0) {
+                    const matchedAnyToken = searchTokens.some(token => {
+                        const pluMatch = item.PLU ? item.PLU.toLowerCase().includes(token) : false;
+                        const descMatch = item.DESC2 ? item.DESC2.toLowerCase().includes(token) : false;
+                        
+                        let barcodeMatch = false;
+                        if (item.BARCD && Array.isArray(item.BARCD)) {
+                            barcodeMatch = item.BARCD.some(b => b.toLowerCase().includes(token));
+                        }
+
+                        return pluMatch || descMatch || barcodeMatch;
+                    });
+
+                    if (!matchedAnyToken) {
+                        return false;
+                    }
+                }
+
+                if (selectedRak !== 'Semua' && item.NAMA_RAK !== selectedRak) {
+                    return false;
+                }
+
+                const itemShelf = item.NOSHELF ? parseInt(item.NOSHELF) : null;
+
+                if (selectedDari !== 'Semua') {
+                    const dariVal = parseInt(selectedDari);
+                    if (itemShelf === null || itemShelf < dariVal) {
+                        return false;
+                    }
+                }
+
+                if (selectedSampai !== 'Semua') {
+                    const sampaiVal = parseInt(selectedSampai);
+                    if (itemShelf === null || itemShelf > sampaiVal) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            if (filteredData.length === 0) {
+                errorMessage.innerHTML = 'Tidak ada data produk yang cocok dengan pencarian atau filter';
+                return;
+            }
+
+            currentIndex = 0;
+            renderCurrentCard();
+            resultModal.style.display = 'flex';
+            setTimeout(() => {
+                resultModal.classList.add('show-modal');
+            }, 10);
+        }
+
+        function resetFilters() {
+            searchInput.value = '';
+            selectRak.value = 'Semua';
+            selectShelfDari.value = 'Semua';
+            selectShelfSampai.value = 'Semua';
+            errorMessage.innerHTML = '';
+            filteredData = [];
+            currentIndex = 0;
+        }
+
+        function closeModalView() {
+            resultModal.classList.remove('show-modal');
+            setTimeout(() => {
+                resultModal.style.display = 'none';
+            }, 300);
+        }
+
+        closeModal.addEventListener('click', closeModalView);
+
+        resultModal.addEventListener('click', (e) => {
+            if (e.target === resultModal) {
+                closeModalView();
+            }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCurrentCard();
+            }
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (currentIndex < filteredData.length - 1) {
+                currentIndex++;
+                renderCurrentCard();
+            }
+        });
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data dari GitHub');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                
+                data.sort((a, b) => {
+                    const rakA = a.NAMA_RAK || '';
+                    const rakB = b.NAMA_RAK || '';
+                    if (rakA !== rakB) return rakA.localeCompare(rakB);
+
+                    const shelfA = a.NOSHELF ? parseInt(a.NOSHELF) : 0;
+                    const shelfB = b.NOSHELF ? parseInt(b.NOSHELF) : 0;
+                    if (shelfA !== shelfB) return shelfA - shelfB;
+
+                    const posisiA = a.KIRIKANAN ? parseInt(a.KIRIKANAN) : 0;
+                    const posisiB = b.KIRIKANAN ? parseInt(b.KIRIKANAN) : 0;
+                    return posisiA - posisiB;
+                });
+
+                rawData = data;
+                populateDropdowns(rawData);
+
+                btnSubmit.addEventListener('click', filterAndDisplayData);
+                btnReset.addEventListener('click', resetFilters);
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                errorMessage.innerHTML = `Terjadi kesalahan: ${error.message}`;
+            });
+    </script>
+
+</body>
+</html>

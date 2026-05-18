@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INDOMARET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Cambria, Georgia, serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f7fa;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+        }
+
+        main {
+            flex: 1;
+            padding: 0;
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff;
+        }
+
+        nav {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+            padding: 10px 5px;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.05);
+            border-top: 2px solid #e1e8ed;
+            z-index: 10;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+        }
+
+        nav ul li {
+            flex: 1;
+            max-width: 120px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #657786;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav ul li a i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        nav ul li a span {
+            display: block;
+            font-size: 11px;
+        }
+
+        nav ul li a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: 0.5s;
+        }
+
+        nav ul li a:hover::before {
+            left: 100%;
+        }
+
+        nav ul li a:hover {
+            color: #007bff;
+            background: rgba(0, 123, 255, 0.08);
+            border-color: #007bff;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        nav ul li a:hover i {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        nav ul li a:active {
+            transform: translateY(-1px);
+        }
+        
+        nav ul li a.active-tab {
+            color: #ffffff;
+            background: #007bff;
+            border-color: #007bff;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        @media (max-width: 360px) {
+            nav ul li a span {
+                font-size: 10px;
+            }
+            nav ul li a i {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <main>
+            <iframe src="scan_pjr.html" name="konten-utama" id="iframe-konten"></iframe>
+        </main>
+
+        <nav>
+            <ul>
+                <li>
+                    <a href="scan_pjr.html" target="konten-utama" class="active-tab" onclick="changeActive(this)">
+                        <i class="fas fa-barcode"></i>
+                        <span>Scan ITT PJR</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="qr_klik.html" target="konten-utama" onclick="changeActive(this)">
+                        <i class="fas fa-qrcode"></i>
+                        <span>QRCode Klik</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="convert.html" target="konten-utama" onclick="changeActive(this)">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Convert Data</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <script>
+        function changeActive(element) {
+            const links = document.querySelectorAll('nav ul li a');
+            links.forEach(link => link.classList.remove('active-tab'));
+            element.classList.add('active-tab');
+        }
+    </script>
+</body>
+</html>

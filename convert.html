@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { 
+            font-family: Cambria, Georgia, serif; 
+            margin: 0; 
+            background-color: #0f172a; 
+            color: #f1f5f9; 
+            padding: 20px;
+        }
+        .container { 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background: #1e293b; 
+            padding: 35px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); 
+            border: 1px solid #334155;
+            position: relative;
+            filter: blur(8px);
+            transition: filter 0.5s ease;
+        }
+        .section { 
+            display: none; 
+        }
+        .section.active { 
+            display: block; 
+        }
+        textarea { 
+            width: 100%; 
+            height: 200px; 
+            margin-top: 12px; 
+            font-family: Cambria, Georgia, serif; 
+            border: 1px solid #475569; 
+            padding: 15px; 
+            box-sizing: border-box; 
+            background-color: #0f172a; 
+            color: #38bdf8;
+            overflow: auto; 
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+        .controls { 
+            margin-bottom: 25px; 
+            padding: 30px 20px; 
+            border: 2px dashed #475569; 
+            border-radius: 12px; 
+            text-align: center; 
+            background-color: #1e293b; 
+            transition: border-color 0.3s;
+        }
+        .controls:hover {
+            border-color: #6366f1;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px auto;
+            color: #94a3b8;
+            font-size: 14px;
+            font-family: Cambria, Georgia, serif;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #334155;
+            color: #f1f5f9;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 15px;
+            transition: background-color 0.2s;
+            font-family: Cambria, Georgia, serif;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #475569;
+        }
+        button.action-btn { 
+            background-color: #6366f1; 
+            color: white; 
+            border: none; 
+            padding: 12px 28px; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            margin: 5px; 
+            font-size: 15px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-family: Cambria, Georgia, serif;
+        }
+        button.action-btn:hover { 
+            background-color: #4f46e5; 
+            transform: translateY(-1px);
+        }
+        button.action-btn:active {
+            transform: translateY(1px);
+        }
+        .download-btn { 
+            background-color: #10b981 !important; 
+            margin-top: 20px !important;
+        }
+        .download-btn:hover { 
+            background-color: #059669 !important; 
+        }
+        label { 
+            font-weight: 500; 
+            display: block; 
+            margin-bottom: 8px; 
+            margin-top: 20px; 
+            color: #cbd5e1;
+            font-size: 15px;
+        }
+        h2 { 
+            text-align: center; 
+            color: #ffffff; 
+            margin-top: 0; 
+            margin-bottom: 25px;
+            font-size: 26px;
+            letter-spacing: -0.5px;
+        }
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            z-index: 10;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #334155;
+            border-top: 5px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            margin-top: 15px;
+            color: #f1f5f9;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="mainContainer" class="container">
+    
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Memproses data , mohon tunggu ...</div>
+    </div>
+
+    <div id="sectionProduk" class="section active">
+        <h2>Convert Data</h2>
+        <div class="controls">
+            <input type="file" id="csvFilesProduk" multiple accept=".csv, .txt">
+            <button class="action-btn" onclick="convertProduk()">Proses Konversi</button>
+        </div>
+        <label>Hasil Konversi :</label>
+        <textarea id="outputProduk" readonly></textarea>
+        <div style="text-align: center;">
+            <button id="dlProduk" class="action-btn download-btn" style="display:none;" onclick="downloadJSON('outputProduk')">Download JSON</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        showWelcomeAlert();
+    });
+
+    function showWelcomeAlert() {
+        Swal.fire({
+            title: 'Menu Khusus Untuk Owner 😁',
+            icon: 'info',
+            position: 'center',
+            showConfirmButton: true,
+            confirmButtonColor: '#6366f1',
+            background: '#1e293b',
+            color: '#f1f5f9',
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showPasswordAlert();
+            }
+        });
+    }
+
+    function showPasswordAlert() {
+        Swal.fire({
+            title: 'Masukkan Password',
+            input: 'password',
+            inputPlaceholder: 'Password ...',
+            position: 'center',
+            showConfirmButton: true,
+            confirmButtonColor: '#6366f1',
+            background: '#1e293b',
+            color: '#f1f5f9',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
+            preConfirm: (password) => {
+                if (password !== 'Mharyrafli') {
+                    Swal.showValidationMessage('Password salah! Silakan coba lagi.');
+                }
+                return password;
+            }
+        }).then((result) => {
+            if (result.value === 'Mharyrafli') {
+                document.getElementById('mainContainer').style.filter = 'none';
+                Swal.fire({
+                    title: 'Akses Diterima',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: '#1e293b',
+                    color: '#f1f5f9'
+                });
+            }
+        });
+    }
+
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+        if (lines.length === 0) return [];
+        const headers = lines[0].split('|').map(h => h.trim());
+        return lines.slice(1).map(line => {
+            const values = line.split('|').map(v => v.trim());
+            let obj = {};
+            for (let i = 0; i < Math.min(headers.length, values.length); i++) {
+                obj[headers[i]] = values[i];
+            }
+            return obj;
+        });
+    }
+
+    function readFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(parseCSV(e.target.result));
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    }
+
+    async function convertProduk() {
+        const fileInput = document.getElementById('csvFilesProduk');
+        const files = fileInput.files;
+
+        if (files.length < 3) {
+            alert("Pilih minimal 3 file (Barcode, Prodmast, Rak).");
+            return;
+        }
+
+        let fBarcode, fProdmast, fRak;
+        for (let f of files) {
+            const name = f.name.toLowerCase();
+            if (name.includes('barcode')) fBarcode = f;
+            else if (name.includes('prodmast')) fProdmast = f;
+            else if (name.includes('rak')) fRak = f;
+        }
+
+        if (!fBarcode || !fProdmast || !fRak) {
+            alert("File tidak lengkap. Pastikan nama file mengandung kata 'barcode', 'prodmast', dan 'rak'.");
+            return;
+        }
+
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.style.display = 'flex';
+
+        setTimeout(async () => {
+            try {
+                const [barcodeData, prodmastData, rakData] = await Promise.all([
+                    readFile(fBarcode), readFile(fProdmast), readFile(fRak)
+                ]);
+
+                let barcodeMap = {};
+                barcodeData.forEach(row => {
+                    const plu = row.PLU;
+                    const barcd = row.BARCD;
+                    if (plu && barcd) {
+                        if (!barcodeMap[plu]) barcodeMap[plu] = [];
+                        if (!barcodeMap[plu].includes(barcd)) barcodeMap[plu].push(barcd);
+                    }
+                });
+
+                let combined = [];
+                prodmastData.forEach(prod => {
+                    const plu = prod.PLUMD;
+                    if (!plu) return;
+                    
+                    const barcdList = barcodeMap[plu] || [];
+                    const matchedRak = rakData.filter(r => r.PLUMD === plu);
+                    const base = {
+                        PLU: plu,
+                        DESC2: prod.DESC2 || "",
+                        PRICE: prod.PRICE || "",
+                        BARCD: barcdList
+                    };
+
+                    if (matchedRak.length > 0) {
+                        matchedRak.forEach(rak => {
+                            combined.push({
+                                ...base,
+                                NAMA_RAK: rak.NAMA_RAK || null,
+                                NOSHELF: rak.NOSHELF || null,
+                                KIRIKANAN: rak.KIRIKANAN || null
+                            });
+                        });
+                    } else {
+                        combined.push({ ...base, NAMA_RAK: null, NOSHELF: null, KIRIKANAN: null });
+                    }
+                });
+
+                document.getElementById('outputProduk').value = JSON.stringify(combined, null, 4);
+                
+                const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                const today = new Date();
+                const formattedDate = `${today.getDate()}_${months[today.getMonth()]}_${today.getFullYear()}`;
+                const dlBtn = document.getElementById('dlProduk');
+                dlBtn.textContent = `Download ${formattedDate}.json`;
+                dlBtn.style.display = 'inline-block';
+            } catch (e) {
+                alert("Error memproses file produk.");
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }, 300);
+    }
+
+    function downloadJSON(areaId) {
+        const data = document.getElementById(areaId).value;
+        if (!data) return;
+        
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const today = new Date();
+        const formattedDate = `${today.getDate()}_${months[today.getMonth()]}_${today.getFullYear()}`;
+        
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${formattedDate}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+</body>
+</html>
