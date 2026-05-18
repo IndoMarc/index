@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Convert Data</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { 
             font-family: Cambria, Georgia, serif; 
@@ -22,7 +21,6 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); 
             border: 1px solid #334155;
             position: relative;
-            filter: blur(8px);
             transition: filter 0.5s ease;
         }
         .section { 
@@ -189,65 +187,6 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        showWelcomeAlert();
-    });
-
-    function showWelcomeAlert() {
-        Swal.fire({
-            title: 'Menu Khusus Untuk Owner 😁',
-            icon: 'info',
-            position: 'center',
-            showConfirmButton: true,
-            confirmButtonColor: '#6366f1',
-            background: '#1e293b',
-            color: '#f1f5f9',
-            allowOutsideClick: false,
-            allowEscapeKey: false
-        }).then((result) => {
-            if (result.isConfirmed) {
-                showPasswordAlert();
-            }
-        });
-    }
-
-    function showPasswordAlert() {
-        Swal.fire({
-            title: 'Masukkan Password',
-            input: 'password',
-            inputPlaceholder: 'Password ...',
-            position: 'center',
-            showConfirmButton: true,
-            confirmButtonColor: '#6366f1',
-            background: '#1e293b',
-            color: '#f1f5f9',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            inputAttributes: {
-                autocapitalize: 'off',
-                autocorrect: 'off'
-            },
-            preConfirm: (password) => {
-                if (password !== 'Mharyrafli') {
-                    Swal.showValidationMessage('Password salah! Silakan coba lagi.');
-                }
-                return password;
-            }
-        }).then((result) => {
-            if (result.value === 'Mharyrafli') {
-                document.getElementById('mainContainer').style.filter = 'none';
-                Swal.fire({
-                    title: 'Akses Diterima',
-                    icon: 'success',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    background: '#1e293b',
-                    color: '#f1f5f9'
-                });
-            }
-        });
-    }
-
     function parseCSV(text) {
         const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
         if (lines.length === 0) return [];
