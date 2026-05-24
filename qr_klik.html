@@ -9,7 +9,7 @@
         body {
             font-family: Cambria, Georgia, serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px 20px;
             background-color: #f4f4f9;
             display: flex;
             flex-direction: column;
@@ -17,7 +17,7 @@
         }
         h2 {
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-size: 28px;
         }
         .container {
@@ -29,6 +29,7 @@
             width: 100%;
             max-width: 600px;
             box-sizing: border-box;
+            margin-bottom: 20px;
         }
         textarea {
             width: 100%;
@@ -68,6 +69,19 @@
         }
         .btn-reset:hover {
             background-color: #bd2130;
+        }
+        .note-container {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 15px 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: justify;
         }
         .modal-overlay {
             display: none;
@@ -176,6 +190,10 @@
         <button class="btn-generate" onclick="generateBulkQR()">Buat QRCode</button>
         <button class="btn-reset" onclick="resetForm()">Reset</button>
     </div>
+</div>
+
+<div class="note-container">
+    <strong>Note:</strong> Contoh untuk membuat QR air aqua galon Qty 2 ( PLU:QTY ) jadi 10036631:2 , Kalau Qty nya hanya 1 berarti yg di ketik hanya PLU nya saja ..
 </div>
 
 <div class="modal-overlay" id="qrModal">
