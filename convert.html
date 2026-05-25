@@ -22,6 +22,8 @@
             border: 1px solid #334155;
             position: relative;
             transition: filter 0.5s ease;
+            filter: blur(8px);
+            pointer-events: none;
         }
         .section { 
             display: none; 
@@ -160,9 +162,65 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .auth-wrapper {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 100%;
+            max-width: 400px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .auth-box {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #475569;
+            text-align: center;
+        }
+        .auth-box h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #ffffff;
+            font-size: 18px;
+        }
+        .auth-box input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 16px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .auth-box input[type="password"]:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        .auth-box .error-msg {
+            color: #f87171;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
+
+<div id="authWrapper" class="auth-wrapper">
+    <div class="auth-box">
+        <h3>Masukkan Password</h3>
+        <input type="password" id="accessCode" placeholder="Ketik password disini ...">
+        <button class="action-btn" onclick="checkCode()">Verifikasi</button>
+        <div id="errorMsg" class="error-msg">Kode salah ! Silakan coba lagi ...</div>
+    </div>
+</div>
 
 <div id="mainContainer" class="container">
     
@@ -187,6 +245,28 @@
 </div>
 
 <script>
+    function checkCode() {
+        const codeInput = document.getElementById('accessCode').value;
+        const errorMsg = document.getElementById('errorMsg');
+        const mainContainer = document.getElementById('mainContainer');
+        const authWrapper = document.getElementById('authWrapper');
+
+        if (codeInput === "mharyrafli") {
+            authWrapper.style.display = 'none';
+            mainContainer.style.filter = 'none';
+            mainContainer.style.pointerEvents = 'auto';
+        } else {
+            errorMsg.style.display = 'block';
+            document.getElementById('accessCode').value = '';
+        }
+    }
+
+    document.getElementById('accessCode').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkCode();
+        }
+    });
+
     function parseCSV(text) {
         const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
         if (lines.length === 0) return [];
