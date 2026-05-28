@@ -31,6 +31,27 @@
             box-sizing: border-box;
             margin-bottom: 20px;
         }
+        .file-input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .file-input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px dashed #bbb;
+            border-radius: 4px;
+            background-color: #fafafa;
+            box-sizing: border-box;
+            font-family: Cambria, Georgia, serif;
+            cursor: pointer;
+        }
         textarea {
             width: 100%;
             height: 120px;
@@ -185,7 +206,11 @@
 <h2>QRCODE KLIK IDM</h2>
 
 <div class="container">
-    <textarea id="text-input" placeholder="Ketik PLU atau Barcode disini ..."></textarea>
+    <div class="file-input-group">
+        <label for="file-input">Input file .txt untuk buat QRCode :</label>
+        <input type="file" id="file-input" accept=".txt" onchange="handleFileUpload(this)">
+    </div>
+    <textarea id="text-input" placeholder="Ketik PLU/Barcode disini , atau input file .txt di atas ..."></textarea>
     <div class="button-group">
         <button class="btn-generate" onclick="generateBulkQR()">Buat QRCode</button>
         <button class="btn-reset" onclick="resetForm()">Reset</button>
@@ -214,6 +239,17 @@
     let currentIndex = 0;
     let qrcodeObj = null;
 
+    function handleFileUpload(input) {
+        let file = input.files[0];
+        if (!file) return;
+
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("text-input").value = e.target.result;
+        };
+        reader.readAsText(file);
+    }
+
     function formatText(text) {
         if (text.includes(':')) {
             let parts = text.split(':');
@@ -231,14 +267,14 @@
         let input = document.getElementById("text-input").value;
         
         if (input.trim() === "") {
-            alert("Silakan masukkan teks terlebih dahulu!");
+            alert("Silakan masukkan teks atau upload file terlebih dahulu!");
             return;
         }
 
         items = input.split(/[\s\n]+/).filter(item => item.trim() !== "");
 
         if (items.length === 0) {
-            alert("Silakan masukkan teks terlebih dahulu!");
+            alert("Silakan masukkan teks atau upload file terlebih dahulu!");
             return;
         }
 
@@ -317,6 +353,7 @@
 
     function resetForm() {
         document.getElementById("text-input").value = "";
+        document.getElementById("file-input").value = "";
         closeModal();
         items = [];
         currentIndex = 0;
