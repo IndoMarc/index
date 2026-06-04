@@ -271,7 +271,7 @@
             return;
         }
 
-        items = input.split(/[\s\n]+/).filter(item => item.trim() !== "");
+        items = input.split(/[\s\n,]+/).filter(item => item.trim() !== "");
 
         if (items.length === 0) {
             alert("Silakan masukkan teks atau upload file terlebih dahulu!");
